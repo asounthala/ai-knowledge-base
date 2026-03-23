@@ -1,20 +1,30 @@
 import mammoth from "mammoth";
-import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+import PDFParser from "pdf2json";
+
+function parsePdf(buffer: Buffer): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const pdfParser = new PDFParser();
+
+    pdfParser.on("pdfParser_dataError", (err: Error | { parserError: Error }) => {
+      reject(err instanceof Error ? err : err.parserError);
+    });
+
+    pdfParser.on("pdfParser_dataReady", (pdfData: { Pages: Array<{ Texts: Array<{ R: Array<{ T: string }> }> }> }) => {
+      const text = pdfData.Pages.map((page) =>
+        page.Texts.map((textObj) =>
+          textObj.R.map((r) => decodeURIComponent(r.T)).join("")
+        ).join(" ")
+      ).join("\n");
+      resolve(text);
+    });
+
+    pdfParser.parseBuffer(buffer);
+  });
+}
 
 export async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
   if (mimeType === "application/pdf") {
-    const uint8Array = new Uint8Array(buffer);
-    const loadingTask = pdfjsLib.getDocument({ data: uint8Array });
-    const pdfDoc = await loadingTask.promise;
-
-    let fullText = "";
-    for (let i = 1; i <= pdfDoc.numPages; i++) {
-      const page = await pdfDoc.getPage(i);
-      const content = await page.getTextContent();
-      const pageText = content.items.map((item: unknown) => (typeof item === "object" && item !== null && "str" in item ? (item as { str: string }).str : "")).join(" ");
-      fullText += pageText + "\n";
-    }
-    return fullText;
+    return parsePdf(buffer);
   }
 
   if (mimeType === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
