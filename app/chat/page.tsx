@@ -164,9 +164,6 @@ export default function ChatPage() {
 	}
 
 	return (
-		<div className="flex h-screen bg-bg text-text overflow-hidden">
-			<Sidebar />
-
 			<main className="flex flex-1 overflow-hidden">
 				{/* Conversation List */}
 				<div className="w-64 border-r border-white/10 flex flex-col p-4 gap-2 overflow-y-auto">
@@ -277,6 +274,5 @@ export default function ChatPage() {
 					</div>
 				</div>
 			</main>
-		</div>
 	);
 }

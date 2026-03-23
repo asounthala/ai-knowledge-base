@@ -1,17 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navItems = [
-  { icon: "💬", label: "New Chat" },
-  { icon: "📁", label: "Documents" },
-  { icon: "🕘", label: "History" },
-  { icon: "⚙️", label: "Settings" },
+  { icon: "⬆", label: "Upload", href: "/" },
+  { icon: "💬", label: "Chats", href: "/chat" },
+  { icon: "📁", label: "Documents", href: "/documents" },
+  { icon: "⚙️", label: "Settings", href: "/settings" },
 ];
 
 export default function Sidebar() {
   const [collapsed, setCollapsed] = useState(false);
-  const [active, setActive] = useState("New Chat");
+  const pathname = usePathname();
 
   return (
     <div
@@ -30,23 +32,25 @@ export default function Sidebar() {
           {collapsed ? "→" : "←"}
         </button>
         {!collapsed && (
-          <span className="font-sans font-bold text-base whitespace-nowrap overflow-hidden">
+          <Link 
+            href={"/"}
+            className="font-sans font-bold text-base whitespace-nowrap overflow-hidden">
             doc<span className="text-accent">Knowledge</span>
-          </span>
+          </Link>
         )}
       </div>
 
       {/* Nav items */}
       <nav className="flex flex-col gap-1 p-2 flex-1">
         {navItems.map((item) => (
-          <button
+          <Link
             key={item.label}
-            onClick={() => setActive(item.label)}
+            href={item.href}
             className={`
               flex items-center gap-3 px-3 py-2.5 rounded-lg
               transition-all duration-150 text-sm font-semibold
               ${collapsed ? "justify-center" : "justify-start"}
-              ${active === item.label
+              ${pathname === item.href
                 ? "bg-accent/20 text-accent"
                 : "text-muted hover:text-text hover:bg-surface2"
               }
@@ -58,7 +62,7 @@ export default function Sidebar() {
                 {item.label}
               </span>
             )}
-          </button>
+          </Link>
         ))}
       </nav>
 
