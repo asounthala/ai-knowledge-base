@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Conversation {
+  id String @id @default(cuid())
+  title String
+  createdAt DateTime @default(now())
+  messages Message[]
+}
+
+model Message {
+  id String @id @default(cuid())
+  role String
+  content String
+  sources String @default("[]")
+  createdAt DateTime @default(now())
+  conversation Conversation @relation(fields: [conversationId], references: [id])
+  conversationId String
+}
